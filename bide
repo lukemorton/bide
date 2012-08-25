@@ -1,0 +1,77 @@
+#!/bin/bash
+
+BIDE_DIR="$HOME/.bide"
+
+bin_hide()
+{
+	local bin="$1"
+	local bin_path="$2"
+	local bin_bide_dir="$BIDE_DIR/$bin/"`md5 -q -s $bin_path`
+
+	if [ -d "$bin_bide_dir" ]; then
+		echo "Sorry cannot continue, a directory already exists in $BIDE_DIR for $bin"
+		exit 1
+	fi
+
+	mkdir -p "$bin_bide_dir"
+
+	echo "Moving $bin_path to $bin_bide_dir."
+	mv "$bin_path" "$bin_bide_dir"
+
+	echo "Saving original path."
+	echo "$bin_path" > "$bin_bide_dir/original_path"
+}
+
+bin_restore()
+{
+	local bin="$1"
+	local bin_bide_dir="$2"
+	local bin_bide_path="$bin_bide_dir/$bin"
+	local bin_path=`cat $bin_bide_dir/original_path`
+
+	echo "Moving $bin_bide_path to $bin_path."
+
+	if [ -f "$bin_bide_path" ]; then
+		mv "$bin_bide_path" "$bin_path"
+	fi
+}
+
+bin_restore_all()
+{
+	local bin="$1"
+	local bin_bide_dir="$BIDE_DIR/$bin"
+
+	if find $bin_bide_dir -maxdepth 0 -empty | read; then
+		echo "Nothing to restore."
+		exit 0
+	fi
+
+	for f in $bin_bide_dir/*
+	do
+		bin_restore "$bin" "$f"
+	done
+
+	echo "Deleting $BIDE_DIR/$bin."
+	rm -rf "$BIDE_DIR/$bin"
+}
+
+bin_hide_all()
+{
+	local bin="$1"
+	local bin_path=`command -v $bin`
+
+	if [ -z "$bin_path" ]; then
+		exit 0
+	fi
+	
+	bin_hide "$bin" "$bin_path"
+	bin_hide_all "$bin"
+}
+
+if [ -n "$2" ]; then
+	"bin_$1_all" $2
+elif [ -z `command -v $1` ]; then
+	echo "No $1 command exists."
+else
+	bin_hide_all $1
+fi
