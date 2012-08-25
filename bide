@@ -15,7 +15,7 @@ bin_hide()
 
 	mkdir -p "$bin_bide_dir"
 
-	echo "Moving $bin_path to $bin_bide_dir."
+	echo "Moving $bin_path to $bin_bide_dir/$bin."
 	mv "$bin_path" "$bin_bide_dir"
 
 	echo "Saving original path."
