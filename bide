@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# bide: binary hiding
+# written by Luke Morton, 2012
+# licensed under MIT
+# https://github.com/DrPheltRight/bide
 
 BIDE_DIR="$HOME/.bide"
 
